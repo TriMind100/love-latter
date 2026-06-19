@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>A Love Letter | Digital Stationery</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Alex+Brush&family=Caveat:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            script: ['"Alex Brush"', 'cursive'],
+            handwritten: ['"Caveat"', 'cursive'],
+          }
+        }
+      }
+    }
+  </script>
+
+
+
+  <style>
+    body {
+      background-color: #8B0E17;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Scaling Container */
+    #letter-card-wrapper {
+      width: 540px;
+      height: 700px;
+      position: absolute;
+      top: calc(50% + 1.7rem);
+      left: 50%;
+      transform: translate(-50%, -50%) scale(var(--scale, 1));
+      transform-origin: center;
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+      user-select: none;
+      perspective: 1000px;
+    }
+
+    #music-toggle-btn {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      right: calc(env(safe-area-inset-right, 0px) + 16px);
+
+      z-index: 9999;
+    }
+
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* Heart Particles */
+    @keyframes float-up {
+      0% {
+        transform: translate(0, 0) scale(0) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.9;
+      }
+
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(var(--scale)) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+
+    .heart-particle {
+      position: absolute;
+      color: #9B111E;
+      pointer-events: none;
+      z-index: 100;
+      animation: float-up var(--duration) cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    /* Spinning record / note for player */
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spin-active {
+      animation: spin 4s linear infinite;
+    }
+
+    /* Pulse Helper for Wax Seal */
+    @keyframes pulse-helper {
+
+      0%,
+      100% {
+        transform: scale(1) translate(-50%, -50%);
+        opacity: 0.75;
+      }
+
+      50% {
+        transform: scale(1.15) translate(-43%, -43%);
+        opacity: 0;
+      }
+    }
+
+    .pulse-ring {
+      animation: pulse-helper 2s infinite ease-out;
+    }
+
+    /* Transition classes for physics envelope */
+    #envelope-container {
+      transition: bottom 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+      overflow: hidden;
+    }
+
+    #letter-card-wrapper.state-opened #envelope-container {
+      overflow: visible;
+    }
+
+    #letter-card {
+      transition: top 0.8s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.5s ease-in-out;
+    }
+
+    #envelope-flap {
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.5s ease-in-out;
+    }
+
+    #wax-seal-btn {
+      transition: opacity 0.4s ease-in-out;
+    }
+
+    #postmark-stamp {
+      transition: opacity 0.6s ease-in-out;
+    }
+
+    /* ============================================================
+       PREMIUM DETAIL LAYER — gold foil, grain, tape, shimmer
+       ============================================================ */
+    :root {
+      --ink-red: #8B0E17;
+      --ink-red-deep: #6B0005;
+      --cream: #FAF5E8;
+      --gold: #C9A24B;
+      --gold-light: #E8D9A8;
+    }
+
+    /* Soft vignette so the card reads as sitting "inside" a lit scene */
+    .vignette-overlay {
+      background: radial-gradient(ellipse 75% 65% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.35) 100%);
+    }
+
+    /* Fine gold foil double-rule frame, sits just inside the scalloped edge */
+    .foil-frame {
+      position: absolute;
+      inset: 16px;
+      border: 1px solid var(--gold);
+      box-shadow: 0 0 0 4px rgba(201, 162, 75, 0.18) inset, 0 0 0 5px rgba(201, 162, 75, 0.35) inset;
+      pointer-events: none;
+    }
+
+    .foil-corner {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border: 1px solid var(--gold);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    /* Washi-tape strip used to "stick" each photo stamp down like a real keepsake */
+    .photo-tape {
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      width: 34px;
+      height: 16px;
+      transform: translateX(-50%) rotate(var(--tape-rot, -4deg));
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.25));
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+      z-index: 5;
+      pointer-events: none;
+      backdrop-filter: blur(0.5px);
+    }
+
+    /* Subtle shimmer sweep across the wax seal, reads as candle-light catching the wax */
+    @keyframes seal-shimmer {
+      0% {
+        opacity: 0;
+        transform: translate(-30%, -30%) rotate(20deg);
+      }
+
+      45% {
+        opacity: 0.55;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(30%, 30%) rotate(20deg);
+      }
+    }
+
+    .seal-shimmer {
+      animation: seal-shimmer 3.2s ease-in-out infinite;
+    }
+
+    /* Fine paper grain overlay for realism on the cream surfaces */
+    .grain-overlay {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    /* Letterpress-style inset for the headline */
+    .letterpress {
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5), 0 -1px 0 rgba(139, 14, 23, 0.25);
+    }
+
+    @media (max-width: 480px) {
+      .photo-tape {
+        width: 28px;
+        height: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans text-[#201b13]">
+
+  <!--
+    ============================================================
+    ✏️  CUSTOMIZE YOUR LETTER — everything you need to change lives
+        in two places, both clearly marked with 📸 / ✏️ comments:
+
+        1. TEXT  → search this file for "EDIT:" — names, title,
+           letter body, sign-off, and the small pill badge.
+        2. PHOTOS → search this file for "photo1 =" / "photo2 ="
+           near the bottom script section, and swap in your own
+           image paths or URLs (e.g. 'images/us-1.jpg').
+        3. SONG  → set the audio src below to your own mp3 file.
+    ============================================================
+  -->
+
+  <!-- WebGL Shader Background -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <canvas id="shader-canvas" class="w-full h-full opacity-65"></canvas>
+  </div>
+
+  <!-- Soft vignette for depth — purely atmospheric, no edits needed -->
+  <div class="vignette-overlay fixed inset-0 z-[1] pointer-events-none"></div>
+
+  <!-- 🎵 EDIT: replace with the path to your own song, e.g. "songs/our-song.mp3" -->
+  <audio id="bg-music" loop src="song.mp3"></audio>
+
+  <!-- Ambient Hearts Container -->
+  <div id="ambient-hearts" class="fixed inset-0 z-10 pointer-events-none"></div>
+
+  <!-- Main scaling container -->
+  <div id="letter-card-wrapper" class="state-closed z-20">
+
+    <!-- Envelope Main Element -->
+    <div id="envelope-container" class="absolute w-[520px] h-[380px] left-[10px]" style="bottom: 160px;">
+
+      <!-- Envelope Back Face -->
+      <svg width="520" height="380" viewBox="0 0 520 380" class="absolute inset-0">
+        <path d="M0,105 L520,105 L520,380 L0,380 Z" fill="#F0EAE1" stroke="#E5E2D9" stroke-width="1.5"
+          filter="url(#paper-noise)" />
+        <path d="M0,105 L260,245 L520,105" fill="#FAF5E8" opacity="0.4" />
+        <path d="M6,109 L260,241 L514,109" fill="none" stroke="#C9A24B" stroke-width="0.6" opacity="0.3" />
+      </svg>
+
+      <!-- 1. The Scalloped Stamp Card -->
+      <div id="letter-card" class="absolute left-[35px] w-[450px] h-[620px] select-none z-20"
+        style="top: 130px; opacity: 0; pointer-events: none;">
+        <!-- SVG Background scalloped mask & border -->
+        <svg id="card-scalloped-bg" width="450" height="620" viewBox="0 0 450 620"
+          class="absolute inset-0 w-full h-full drop-shadow-[0_10px_25px_rgba(0,0,0,0.3)]">
+          <defs>
+            <!-- Real paper texture using fine monochrome fractal noise -->
+            <filter id="paper-noise" x="0%" y="0%" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.3" numOctaves="3" result="noise" />
+              <feColorMatrix type="matrix"
+                values="0.33,0.33,0.33,0,0,0.33,0.33,0.33,0,0,0.33,0.33,0.33,0,0,0,0,0,0.035,0" result="grayNoise" />
+              <feBlend mode="multiply" in="SourceGraphic" in2="grayNoise" />
+            </filter>
+          </defs>
+          <path id="scalloped-path" fill="#FAF5E8" stroke="#DCD6C8" stroke-width="2" filter="url(#paper-noise)" />
+        </svg>
+
+        <!-- 3D paper light highlight overlay -->
+        <div class="absolute inset-0 pointer-events-none"
+          style="background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 60%, rgba(139,14,23,0.02) 100%);">
+        </div>
+
+        <!-- Fine paper grain for a tangible, printed feel -->
+        <div class="grain-overlay absolute inset-0 pointer-events-none"></div>
+
+        <!-- Premium gold foil frame -->
+        <div class="foil-frame rounded-sm"></div>
+        <div class="foil-corner top-[10px] left-[10px] border-r-0 border-b-0"></div>
+        <div class="foil-corner top-[10px] right-[10px] border-l-0 border-b-0"></div>
+        <div class="foil-corner bottom-[10px] left-[10px] border-r-0 border-t-0"></div>
+        <div class="foil-corner bottom-[10px] right-[10px] border-l-0 border-t-0"></div>
+
+        <!-- Stamp Card Content Area -->
+        <div class="absolute inset-[10px] pt-[34px] px-6 pb-6 flex flex-col justify-between z-10">
+          <!-- Inset dotted line decoration -->
+          <div
+            class="absolute inset-[6px] border-[1.2px] border-dashed border-[#8B0E17]/20 rounded-sm pointer-events-none">
+          </div>
+
+          <!-- Top Header Section -->
+          <div class="text-center mt-1">
+            <h1 class="letterpress font-serif text-[28px] font-bold text-[#8B0E17] tracking-[0.18em] leading-none uppercase">A Love
+              Letter</h1>
+            <svg width="120" height="10" viewBox="0 0 120 10" class="mx-auto mt-1.5 opacity-80">
+              <line x1="0" y1="5" x2="48" y2="5" stroke="#C9A24B" stroke-width="1" />
+              <path d="M55 5 L60 1 L65 5 L60 9 Z" fill="#C9A24B" />
+              <line x1="72" y1="5" x2="120" y2="5" stroke="#C9A24B" stroke-width="1" />
+            </svg>
+          </div>
+
+          <!-- Middle Section: Fields & Photos -->
+          <div class="grid grid-cols-[190px_1fr] gap-3 items-center my-3 relative">
+            <!-- Left side: TO and FROM fields -->
+            <div class="flex flex-col gap-4 pl-1">
+              <div class="flex flex-col border-b-[1.2px] border-[#8B0E17] pb-0.5">
+                <span class="font-sans text-[9px] font-bold text-[#8B0E17]/60 tracking-wider">TO:</span>
+                <!-- ✏️ EDIT: recipient's name -->
+                <span id="field-to"
+                  class="font-script text-[28px] text-[#8B0E17] leading-none outline-none mt-0.5 min-w-[120px]">Name 1</span>
+              </div>
+              <div class="flex flex-col border-b-[1.2px] border-[#8B0E17] pb-0.5">
+                <span class="font-sans text-[9px] font-bold text-[#8B0E17]/60 tracking-wider">FROM:</span>
+                <!-- ✏️ EDIT: your name -->
+                <span id="field-from"
+                  class="font-script text-[28px] text-[#8B0E17] leading-none outline-none mt-0.5 min-w-[120px]">Your Name</span>
+              </div>
+            </div>
+
+            <!-- Right side: Couple Photo Stamps -->
+            <!-- 📸 EDIT: set the image paths near "let photo1 =" / "let photo2 =" further down the page -->
+            <div class="flex justify-end gap-2 pr-1">
+              <!-- Stamp 1 -->
+              <div class="relative w-[76px] h-[108px] shadow-sm" style="transform: rotate(-3deg);">
+                <div class="photo-tape" style="--tape-rot: -8deg;"></div>
+                <div id="stamp-container-1" class="w-full h-full">
+                  <!-- SVG Stamp renders here programmatically, fed by photo1 below -->
+                </div>
+              </div>
+
+              <!-- Stamp 2 -->
+              <div class="relative w-[76px] h-[108px] shadow-sm" style="transform: rotate(2.5deg);">
+                <div class="photo-tape" style="--tape-rot: 7deg;"></div>
+                <div id="stamp-container-2" class="w-full h-full">
+                  <!-- SVG Stamp renders here programmatically, fed by photo2 below -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pill Badge — a small tagline, fully optional -->
+          <div class="text-center">
+            <div
+              class="inline-block bg-[#9E5343] text-[#FAF5E8] px-3 py-0.5 rounded-full text-[9px] font-sans font-bold tracking-widest uppercase shadow-sm">
+              <!-- ✏️ EDIT: short tagline / hashtag / date -->
+              <span id="field-badge" class="outline-none">KOLKODE • Handwritten With Love</span>
+            </div>
+          </div>
+
+          <!-- Handwritten Title -->
+          <div class="text-center">
+            <!-- ✏️ EDIT: greeting line -->
+            <h2 id="field-title" class="font-script text-[28px] text-[#8B0E17] leading-none outline-none">My Love, Arpan
+            </h2>
+          </div>
+
+          <!-- Body Text Paragraph -->
+          <div class="px-2 leading-relaxed text-center">
+            <!-- ✏️ EDIT: the letter itself -->
+            <p id="field-body"
+              class="font-handwritten text-[18px] font-medium text-[#8B0E17] leading-[1.5] outline-none">
+              My love Arpan, ever since you came into my life, everything feels brighter and more meaningful—your smile gives
+              me peace, your voice brings me joy, and your presence makes every moment feel complete; I carry you in my
+              heart always, and no matter where life takes us, my love for you will only grow stronger.
+            </p>
+          </div>
+
+          <!-- Sign-off Line -->
+          <div class="text-center mr-4 flex justify-end">
+            <!-- ✏️ EDIT: sign-off -->
+            <span id="field-signoff" class="font-handwritten text-[18px] text-[#8B0E17] outline-none">— Your Name</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Envelope Front Pocket -->
+      <svg width="520" height="380" viewBox="0 0 520 380"
+        class="absolute inset-0 z-30 drop-shadow-[0_-5px_15px_rgba(0,0,0,0.18)] pointer-events-none">
+        <!-- Cream textured pocket base -->
+        <path d="M0,105 L260,250 L520,105 L520,380 L0,380 Z" fill="#FAF5E8" stroke="#EBE8DF" stroke-width="1.5"
+          filter="url(#paper-noise)" />
+        <!-- Inner shadow shading along folds -->
+        <path d="M0,105 L260,250 L520,105" fill="none" stroke="#E5E2D9" stroke-width="2.5" opacity="0.6" />
+        <path d="M0,380 L260,250 M520,380 L260,250" fill="none" stroke="#E0DBD0" stroke-width="1.5" opacity="0.4" />
+        <!-- Fine gold trim tracing the fold, a small premium-stationery touch -->
+        <path d="M6,109 L260,243 L514,109" fill="none" stroke="#C9A24B" stroke-width="0.6" opacity="0.4" />
+      </svg>
+
+      <!-- Postmark Stamp overlay (tilted, bottom right) -->
+      <div id="postmark-stamp"
+        class="absolute right-[35px] bottom-[30px] pointer-events-none z-30 opacity-0 transition-opacity duration-700">
+        <svg width="100" height="100" viewBox="0 0 100 100" class="rotate-[12deg] opacity-[0.75]">
+          <path id="postmark-text-path" d="M 15 50 a 35 35 0 1 1 70 0 a 35 35 0 1 1 -70 0" fill="none" stroke="none" />
+          <circle cx="50" cy="50" r="35" fill="none" stroke="#A84A42" stroke-width="1.2" stroke-dasharray="2,2" />
+          <circle cx="50" cy="50" r="29" fill="none" stroke="#A84A42" stroke-width="0.8" />
+          <text fill="#A84A42" font-family="'Plus Jakarta Sans', sans-serif" font-size="7" font-weight="bold"
+            letter-spacing="1.5">
+            <textPath href="#postmark-text-path" startOffset="50%" text-anchor="middle">
+              MADE WITH LOVE • KOLKODE •
+            </textPath>
+          </text>
+          <!-- Center heart of stamp -->
+          <path d="M 50 43 C 46 39, 41 43, 41 48 C 41 54, 50 58, 50 61 C 50 58, 59 54, 59 48 C 59 43, 54 39, 50 43 Z"
+            fill="#A84A42" />
+        </svg>
+      </div>
+
+      <!-- Envelope Flap (3D Flip Part) -->
+      <div id="envelope-flap" class="absolute top-[105px] left-0 w-[520px] h-[145px] z-40"
+        style="transform-origin: top; transform-style: preserve-3d;">
+        <!-- Front Flap Face (Closed / Triangle pointing down) -->
+        <div class="flap-front absolute inset-0 backface-hidden z-40">
+          <svg width="520" height="145" viewBox="0 0 520 145"
+            class="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.12)]">
+            <path d="M0,0 L260,135 L520,0 Z" fill="#FAF5E8" stroke="#EBE8DF" stroke-width="1.5"
+              filter="url(#paper-noise)" />
+            <path d="M6,4 L260,128 L514,4" fill="none" stroke="#C9A24B" stroke-width="0.6" opacity="0.35" />
+          </svg>
+        </div>
+        <!-- Back Flap Face (Opened / Triangle pointing up) -->
+        <div class="flap-back absolute inset-0 backface-hidden z-30" style="transform: rotateX(180deg);">
+          <svg width="520" height="145" viewBox="0 0 520 145" class="w-full h-full">
+            <path d="M0,0 L260,135 L520,0 Z" fill="#FAF5E8" stroke="#E5E2D9" stroke-width="1.5"
+              filter="url(#paper-noise)" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Wax Seal & Click Trigger -->
+      <div id="wax-seal-btn" onclick="openEnvelope()" role="button" tabindex="0"
+        class="absolute left-[260px] top-[240px] -translate-x-1/2 -translate-y-1/2 z-50 cursor-pointer transition-all duration-500">
+        <!-- Floating Helper Alert -->
+        <div id="open-helper-text"
+          class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-[#FAF5E8] text-[#8B0E17] text-[10px] font-sans font-bold tracking-widest px-3 py-1 rounded-md whitespace-nowrap shadow-md border border-[#C9A24B]/40 flex items-center gap-1 transition-all duration-300">
+          <span class="material-symbols-outlined text-xs animate-bounce">favorite</span>
+          TAP HERE TO OPEN
+        </div>
+
+        <!-- Pulsing Ring -->
+        <div
+          class="pulse-ring absolute w-[90px] h-[90px] rounded-full border-2 border-[#8B0E17] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-75 pointer-events-none"
+        </div>
+
+        <!-- Seal Drawing -->
+        <div onclick="openEnvelope()" class="transition-transform duration-300 hover:scale-110 active:scale-95">
+          <svg width="76" height="76" viewBox="0 0 100 100" class="drop-shadow-[0_4px_8px_rgba(139,14,23,0.4)]">
+            <defs>
+              <filter id="wax-depth-3d" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
+                <feOffset in="blur" dx="1.5" dy="3" result="offset" />
+                <feSpecularLighting in="blur" surfaceScale="5" specularConstant="1" specularExponent="22"
+                  lighting-color="#fff" result="specOut">
+                  <feDistantLight azimuth="225" elevation="45" />
+                </feSpecularLighting>
+                <feComposite in="specOut" in2="SourceAlpha" operator="in" result="specOut" />
+                <feComposite in="SourceGraphic" in2="specOut" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"
+                  result="litPaint" />
+                <feMerge>
+                  <feMergeNode in="offset" />
+                  <feMergeNode in="litPaint" />
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- Wax outer border irregular -->
+            <path d="M 50 10 C 26 2, 6 22, 13 50 C 18 78, 50 94, 50 97 C 50 94, 82 78, 87 50 C 94 22, 74 2, 50 10 Z"
+              fill="#8A030C" filter="url(#wax-depth-3d)" />
+            <!-- Inner gloss layer -->
+            <path d="M 50 15 C 31 6, 11 26, 21 50 C 31 74, 50 89, 50 91 C 50 89, 69 74, 79 50 C 89 26, 69 6, 50 15 Z"
+              fill="#9B111E" opacity="0.9" filter="url(#wax-depth-3d)" />
+            <!-- Embossed central heart outline -->
+            <path d="M 50 31 C 41 21, 26 34, 36 49 C 46 64, 50 74, 50 76 C 50 74, 54 64, 64 49 C 74 34, 59 21, 50 31 Z"
+              fill="#6B0005" />
+            <path d="M 50 34 C 42 25, 29 37, 38 50 C 47 63, 50 71, 50 73 C 50 71, 53 63, 62 50 C 71 37, 58 25, 50 34 Z"
+              fill="#8A030C" opacity="0.8" />
+            <!-- Thin gold rim, reads as a pressed metal ring around the wax -->
+            <circle cx="50" cy="52" r="44" fill="none" stroke="#C9A24B" stroke-width="0.6" opacity="0.35" />
+            <!-- Candle-light shimmer sweep -->
+            <ellipse class="seal-shimmer" cx="40" cy="38" rx="16" ry="9" fill="#FFFFFF" opacity="0" />
+          </svg>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Top Right Music Toggle Button -->
+  <button id="music-toggle-btn" onclick="toggleMusic()"
+    class="fixed z-50 flex items-center justify-center w-12 h-12 bg-[#FAF5E8]/85 backdrop-blur rounded-full shadow-lg ring-1 ring-[#C9A24B]/50 border border-[#FAF5E8]/40 text-[#8B0E17] hover:scale-105 active:scale-95 transition-all animate-none"
+    style="top: env(safe-area-inset-top, 1rem); right: env(safe-area-inset-right, 1rem);"
+    title="Toggle Romantic Music">
+    <span id="music-icon" class="material-symbols-outlined fill-0 text-2xl">music_note</span>
+  </button>
+
+
+
+  <script>
+    // 1. Programmatic Layout Scaling
+    function scaleApp() {
+      const wrapper = document.getElementById('letter-card-wrapper');
+      const isOpened = !wrapper.classList.contains('state-closed');
+
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // Bounding box size varies based on whether it is open or closed
+      const targetW = 540;
+      const targetH = isOpened ? 740 : 420;
+
+      // Calculate best scaling factor
+      const scale = Math.min(1.2, Math.min((w - 24) / targetW, (h - 24) / targetH));
+      wrapper.style.setProperty('--scale', scale);
+    }
+    window.addEventListener('resize', scaleApp);
+    window.addEventListener('DOMContentLoaded', scaleApp);
+    scaleApp();
+
+    // 2. Programmatic Scalloped Card Path Generator (450x620 dimensions)
+    function updateCardScallops() {
+      const pathEl = document.getElementById('scalloped-path');
+      const w = 450;
+      const h = 620;
+      const r = 8; // notch radius
+      const spacing = 22; // target spacing
+
+      let path = `M ${r} ${r} `;
+
+      // Top edge (left to right)
+      let nX = Math.round((w - 2 * r) / spacing);
+      let gX = (w - 2 * r) / nX;
+      for (let i = 0; i < nX; i++) {
+        let x1 = r + i * gX;
+        let cx = x1 + gX / 2;
+        path += `L ${cx - r} ${r} A ${r} ${r} 0 0 0 ${cx + r} ${r} `;
+      }
+      path += `L ${w - r} ${r} `;
+
+      // Right edge (top to bottom)
+      let nY = Math.round((h - 2 * r) / spacing);
+      let gY = (h - 2 * r) / nY;
+      for (let i = 0; i < nY; i++) {
+        let y1 = r + i * gY;
+        let cy = y1 + gY / 2;
+        path += `L ${w - r} ${cy - r} A ${r} ${r} 0 0 0 ${w - r} ${cy + r} `;
+      }
+      path += `L ${w - r} ${h - r} `;
+
+      // Bottom edge (right to left)
+      for (let i = nX - 1; i >= 0; i--) {
+        let x1 = r + i * gX;
+        let cx = x1 + gX / 2;
+        path += `L ${cx + r} ${h - r} A ${r} ${r} 0 0 0 ${cx - r} ${h - r} `;
+      }
+      path += `L ${r} ${h - r} `;
+
+      // Left edge (bottom to top)
+      for (let i = nY - 1; i >= 0; i--) {
+        let y1 = r + i * gY;
+        let cy = y1 + gY / 2;
+        path += `L ${r} ${cy + r} A ${r} ${r} 0 0 0 ${r} ${cy - r} `;
+      }
+      path += 'Z';
+
+      pathEl.setAttribute('d', path);
+    }
+    updateCardScallops();
+
+    // Helper for stamp scallops inside SVG
+    function getScallopedStampSvg(w, h, r, spacing, imageUrl, id) {
+      let path = `M ${r} ${r} `;
+      let nX = Math.round((w - 2 * r) / spacing);
+      let gX = (w - 2 * r) / nX;
+      for (let i = 0; i < nX; i++) {
+        let x1 = r + i * gX;
+        let cx = x1 + gX / 2;
+        path += `L ${cx - r} ${r} A ${r} ${r} 0 0 0 ${cx + r} ${r} `;
+      }
+      path += `L ${w - r} ${r} `;
+
+      let nY = Math.round((h - 2 * r) / spacing);
+      let gY = (h - 2 * r) / nY;
+      for (let i = 0; i < nY; i++) {
+        let y1 = r + i * gY;
+        let cy = y1 + gY / 2;
+        path += `L ${w - r} ${cy - r} A ${r} ${r} 0 0 0 ${w - r} ${cy + r} `;
+      }
+      path += `L ${w - r} ${h - r} `;
+
+      for (let i = nX - 1; i >= 0; i--) {
+        let x1 = r + i * gX;
+        let cx = x1 + gX / 2;
+        path += `L ${cx + r} ${h - r} A ${r} ${r} 0 0 0 ${cx - r} ${h - r} `;
+      }
+      path += `L ${r} ${h - r} `;
+
+      for (let i = nY - 1; i >= 0; i--) {
+        let y1 = r + i * gY;
+        let cy = y1 + gY / 2;
+        path += `L ${r} ${cy + r} A ${r} ${r} 0 0 0 ${r} ${cy - r} `;
+      }
+      path += 'Z';
+
+      const innerDashedInset = 5;
+      const innerW = w - 2 * innerDashedInset;
+      const innerH = h - 2 * innerDashedInset;
+
+      return `
+        <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="w-full h-full">
+          <defs>
+            <clipPath id="stamp-clip-${id}">
+              <path d="${path}" />
+            </clipPath>
+          </defs>
+          <!-- Base Stamp Paper and shadows -->
+          <path d="${path}" fill="#FAF5E8" stroke="#8B0E17" stroke-width="1.2" />
+          <!-- Image fill -->
+          <image href="${imageUrl}" width="${w}" height="${h}" clip-path="url(#stamp-clip-${id})" preserveAspectRatio="xMidYMid slice"
+            onerror="this.onerror=null;this.setAttribute('href','data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDIwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOEIwRTE3Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjIyIiBmaWxsPSIjRkFGNUU4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj5BZGQgUGhvdG88L3RleHQ+PC9zdmc+')" />
+          <!-- Stamp border dotted inset -->
+          <rect x="${innerDashedInset}" y="${innerDashedInset}" width="${innerW}" height="${innerH}" fill="none" stroke="#FAF5E8" stroke-width="1.2" stroke-dasharray="2,2" clip-path="url(#stamp-clip-${id})" />
+        </svg>
+      `;
+    }
+
+    // 📸 EDIT: add your own two photos here. Use a relative path (e.g. "images/us-1.jpg"),
+    // an absolute URL, or a base64 data URI. The placeholders below render a visible
+    // "add your photo" tile until you do, so you'll never publish this with a broken image.
+    let photo1 = 'https://i.pinimg.com/736x/3d/14/8b/3d148bfb0707992092a7b1ba40ce08a9.jpg';
+    let photo2 = '	https://i.pinimg.com/736x/2c/d6/98/2cd698e22ae8975752f9b44fcdecbef3.jpg';
+
+    function renderStamps() {
+      document.getElementById('stamp-container-1').innerHTML = getScallopedStampSvg(76, 108, 3, 11, photo1, 1);
+      document.getElementById('stamp-container-2').innerHTML = getScallopedStampSvg(76, 108, 3, 11, photo2, 2);
+    }
+    renderStamps();
+
+
+
+    // 5. Envelope Opening Transition Sequence
+    function openEnvelope() {
+      const wrapper = document.getElementById('letter-card-wrapper');
+      const container = document.getElementById('envelope-container');
+      const flap = document.getElementById('envelope-flap');
+      const card = document.getElementById('letter-card');
+      const seal = document.getElementById('wax-seal-btn');
+      const helper = document.getElementById('open-helper-text');
+      const postmark = document.getElementById('postmark-stamp');
+
+      // Update state class
+      wrapper.classList.remove('state-closed');
+      wrapper.classList.add('state-opened');
+
+      // Hide helper text and fade seal out
+      helper.style.opacity = '0';
+      seal.style.opacity = '0';
+      seal.style.pointerEvents = 'none';
+
+      // Stage 1: Flip top flap open (3D transition)
+      flap.style.transform = 'rotateX(180deg)';
+      flap.style.opacity = '0';
+      flap.style.pointerEvents = 'none';
+
+      // Stage 2: Slide letter card up, push envelope down, and fade in utilities/postmarks
+      setTimeout(() => {
+        container.style.bottom = '20px';
+        card.style.top = '-350px';
+        card.style.opacity = '1';
+        card.style.pointerEvents = 'auto';
+        postmark.style.opacity = '1';
+
+        // Recalculate scaling based on open taller target height
+        scaleApp();
+      }, 450);
+
+      // Trigger heart particle burst explosion from the wax seal origin
+      const originX = window.innerWidth / 2;
+      const originY = window.innerHeight / 2 + 100;
+      for (let i = 0; i < 40; i++) {
+        createHeartParticle(originX, originY);
+      }
+
+      // Autoplay background music
+      const music = document.getElementById('bg-music');
+      if (music.paused) {
+        music.play().then(() => {
+          document.getElementById('music-icon').innerText = 'music_note';
+          document.getElementById('music-icon').classList.add('spin-active');
+        }).catch(err => console.log("Audio play blocked: " + err));
+      }
+    }
+
+    function createHeartParticle(x, y) {
+      const heart = document.createElement('span');
+      heart.className = 'material-symbols-outlined heart-particle';
+      heart.style.left = `${x}px`;
+      heart.style.top = `${y}px`;
+      heart.style.fontVariationSettings = "'FILL' 1, 'wght' 400";
+      heart.innerText = 'favorite';
+
+      const duration = (Math.random() * 1.5 + 1.2).toFixed(2);
+      const angle = (Math.random() * 360) * Math.PI / 180;
+      const distance = Math.random() * 220 + 80;
+
+      const tx = (Math.cos(angle) * distance).toFixed(2);
+      const ty = (Math.sin(angle) * distance - 250).toFixed(2); // Fly upwards
+      const rot = Math.floor(Math.random() * 360 - 180);
+      const scale = (Math.random() * 1.2 + 0.6).toFixed(2);
+
+      heart.style.setProperty('--tx', `${tx}px`);
+      heart.style.setProperty('--ty', `${ty}px`);
+      heart.style.setProperty('--rot', `${rot}deg`);
+      heart.style.setProperty('--scale', scale);
+      heart.style.setProperty('--duration', `${duration}s`);
+      heart.style.fontSize = `${Math.floor(Math.random() * 15 + 10)}px`;
+
+      document.getElementById('ambient-hearts').appendChild(heart);
+
+      setTimeout(() => {
+        heart.remove();
+      }, parseFloat(duration) * 1000);
+    }
+
+    // Spawns slow ambient floating hearts in the background occasionally
+    setInterval(() => {
+      const burstContainer = document.getElementById('ambient-hearts');
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      const heart = document.createElement('span');
+      heart.className = 'material-symbols-outlined heart-particle';
+      heart.style.left = `${Math.random() * w}px`;
+      heart.style.top = `${h + 20}px`;
+      heart.style.fontVariationSettings = "'FILL' 1, 'wght' 200";
+      heart.innerText = 'favorite';
+
+      const duration = (Math.random() * 4 + 4).toFixed(2);
+      const tx = (Math.random() * 100 - 50).toFixed(2);
+      const ty = `-${h + 100}px`;
+      const rot = Math.floor(Math.random() * 180 - 90);
+      const scale = (Math.random() * 0.8 + 0.3).toFixed(2);
+
+      heart.style.setProperty('--tx', `${tx}px`);
+      heart.style.setProperty('--ty', ty);
+      heart.style.setProperty('--rot', `${rot}deg`);
+      heart.style.setProperty('--scale', scale);
+      heart.style.setProperty('--duration', `${duration}s`);
+      heart.style.fontSize = `${Math.floor(Math.random() * 18 + 12)}px`;
+      heart.style.opacity = 0.25;
+
+      burstContainer.appendChild(heart);
+
+      setTimeout(() => {
+        heart.remove();
+      }, parseFloat(duration) * 1000);
+    }, 2000);
+
+    // 6. Music Toggle Controls
+    function toggleMusic() {
+      const music = document.getElementById('bg-music');
+      const icon = document.getElementById('music-icon');
+      if (music.paused) {
+        music.play();
+        icon.innerText = 'music_note';
+        icon.classList.add('spin-active');
+      } else {
+        music.pause();
+        icon.innerText = 'music_off';
+        icon.classList.remove('spin-active');
+      }
+    }
+
+
+
+    // 8. WebGL Bokeh Shader Background logic
+    (ariaShader = function () {
+      const canvas = document.getElementById('shader-canvas');
+
+      function resizeCanvas() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+        }
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return;
+
+      const vs = `
+        attribute vec2 position;
+        varying vec2 uv;
+        void main() {
+          uv = position * 0.5 + 0.5;
+          gl_Position = vec4(position, 0.0, 1.0);
+        }
+      `;
+
+      const fs = `
+        precision highp float;
+        varying vec2 uv;
+        uniform float time;
+        uniform vec2 resolution;
+
+        float drawHeart(vec2 pos, float scale) {
+          pos *= 2.0;
+          float a = atan(pos.x, pos.y) / 3.14159265;
+          float r = length(pos);
+          float h = abs(a);
+          float d = (13.0 * h - 22.0 * h * h + 10.0 * h * h * h) / (6.0 - 5.0 * h);
+          return smoothstep(d, d - 0.08, r / scale);
+        }
+
+        void main() {
+          vec2 p = uv;
+          vec3 color1 = vec3(0.38, 0.02, 0.06); // Deepest red
+          vec3 color2 = vec3(0.55, 0.05, 0.1);  // Slightly brighter red
+          
+          vec3 finalColor = mix(color1, color2, p.y + sin(time * 0.15) * 0.15);
+          
+          float hearts = 0.0;
+          for (float i = 0.0; i < 9.0; i++) {
+            float seed = i * 238.45;
+            vec2 offset = vec2(
+              fract(sin(seed) * 1000.0 + time * (0.02 + 0.01 * sin(i))),
+              fract(cos(seed) * 1000.0 + time * (0.04 + 0.025 * cos(i)))
+            );
+            vec2 heartCoord = uv - offset;
+            if (heartCoord.x < -0.5) heartCoord.x += 1.0;
+            if (heartCoord.x > 0.5) heartCoord.x -= 1.0;
+            if (heartCoord.y < -0.5) heartCoord.y += 1.0;
+            if (heartCoord.y > 0.5) heartCoord.y -= 1.0;
+
+            float pulse = 0.04 + 0.025 * sin(time * 0.8 + i);
+            hearts += drawHeart(heartCoord, pulse) * (0.16 + 0.08 * sin(time * 0.4 + i));
+          }
+
+          finalColor += vec3(0.95, 0.1, 0.2) * hearts;
+          gl_FragColor = vec4(finalColor, 1.0);
+        }
+      `;
+
+      function compileShader(src, type) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+
+      const program = gl.createProgram();
+      gl.attachShader(program, compileShader(vs, gl.VERTEX_SHADER));
+      gl.attachShader(program, compileShader(fs, gl.FRAGMENT_SHADER));
+      gl.linkProgram(program);
+      gl.useProgram(program);
+
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, -1, 1, -1, -1, 1,
+        -1, 1, 1, -1, 1, 1
+      ]), gl.STATIC_DRAW);
+
+      const positionLocation = gl.getAttribLocation(program, 'position');
+      gl.enableVertexAttribArray(positionLocation);
+      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+      const timeUniform = gl.getUniformLocation(program, 'time');
+      const resUniform = gl.getUniformLocation(program, 'resolution');
+
+      function draw(t) {
+        resizeCanvas();
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform1f(timeUniform, t * 0.001);
+        gl.uniform2f(resUniform, canvas.width, canvas.height);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+    })();
+  </script>
+
+</body>
+
+</html>

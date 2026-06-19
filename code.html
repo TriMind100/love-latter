@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>A Love Letter | Digital Stationery</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Alex+Brush&family=Caveat:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            script: ['"Alex Brush"', 'cursive'],
+            handwritten: ['"Caveat"', 'cursive'],
+          }
+        }
+      }
+    }
+  </script>
+
+
+
+  <style>
+    body {
+      background-color: #8B0E17;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Scaling Container */
+    #letter-card-wrapper {
+      width: 540px;
+      height: 700px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(var(--scale, 1));
+      transform-origin: center;
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+      user-select: none;
+      perspective: 1000px;
+    }
+
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* Heart Particles */
+    @keyframes float-up {
+      0% {
+        transform: translate(0, 0) scale(0) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.9;
+      }
+
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(var(--scale)) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+
+    .heart-particle {
+      position: absolute;
+      color: #9B111E;
+      pointer-events: none;
+      z-index: 100;
+      animation: float-up var(--duration) cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    /* Sparkle / Star particles */
+    @keyframes sparkle-float {
+      0% {
+        transform: translate(0, 0) scale(0) rotate(0deg);
+        opacity: 0;
+      }
+      15% {
+        opacity: 1;
+        transform: translate(calc(var(--tx) * 0.15), calc(var(--ty) * 0.15)) scale(var(--scale)) rotate(45deg);
+      }
+      50% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+
+    .sparkle-particle {
+      position: absolute;
+      pointer-events: none;
+      z-index: 100;
+      animation: sparkle-float var(--duration) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Cute emoji float animation */
+    @keyframes emoji-float {
+      0% {
+        transform: translate(0, 0) scale(0) rotate(-20deg);
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+        transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(1.3) rotate(0deg);
+      }
+      60% {
+        opacity: 0.9;
+        transform: translate(calc(var(--tx) * 0.6), calc(var(--ty) * 0.6)) scale(var(--scale)) rotate(10deg);
+      }
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(0.2) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+
+    .emoji-particle {
+      position: absolute;
+      pointer-events: none;
+      z-index: 100;
+      font-size: var(--size);
+      animation: emoji-float var(--duration) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Wax seal crack animation */
+    @keyframes seal-crack {
+      0% {
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+      }
+      20% {
+        transform: scale(1.25) rotate(-5deg);
+        filter: brightness(1.4);
+      }
+      40% {
+        transform: scale(1.15) rotate(3deg);
+        filter: brightness(1.2);
+      }
+      60% {
+        transform: scale(0.9) rotate(-2deg);
+        filter: brightness(0.8);
+      }
+      80% {
+        transform: scale(0.4) rotate(8deg);
+        opacity: 0.5;
+        filter: brightness(0.5);
+      }
+      100% {
+        transform: scale(0) rotate(15deg);
+        opacity: 0;
+        filter: brightness(0);
+      }
+    }
+
+    .seal-cracking {
+      animation: seal-crack 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Gentle wobble for card arrival */
+    @keyframes gentle-wobble {
+      0% { transform: rotate(0deg); }
+      15% { transform: rotate(1.5deg); }
+      30% { transform: rotate(-1.2deg); }
+      45% { transform: rotate(0.8deg); }
+      60% { transform: rotate(-0.5deg); }
+      75% { transform: rotate(0.3deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .card-wobble {
+      animation: gentle-wobble 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    /* Glow aura behind the card */
+    @keyframes glow-pulse {
+      0%, 100% {
+        box-shadow: 0 0 40px 10px rgba(255, 100, 120, 0.0);
+        opacity: 0;
+      }
+      30% {
+        opacity: 1;
+      }
+      50% {
+        box-shadow: 0 0 80px 30px rgba(255, 100, 120, 0.35);
+        opacity: 1;
+      }
+      100% {
+        box-shadow: 0 0 50px 15px rgba(255, 100, 120, 0.15);
+        opacity: 1;
+      }
+    }
+
+    .card-glow {
+      position: absolute;
+      inset: -20px;
+      border-radius: 20px;
+      pointer-events: none;
+      z-index: -1;
+      animation: glow-pulse 3s ease-out forwards;
+    }
+
+    /* Staggered content reveal */
+    @keyframes content-fade-up {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content-reveal {
+      opacity: 0;
+    }
+
+    .content-reveal.animate {
+      animation: content-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Content fade-out (reverse) */
+    @keyframes content-fade-down {
+      0% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+    }
+
+    .content-reveal.hide {
+      animation: content-fade-down 0.5s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+    }
+
+    /* Word-by-word pop-in for message */
+    @keyframes word-pop {
+      0% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.7);
+        filter: blur(4px);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1.05);
+        filter: blur(0px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+      }
+    }
+
+    .word-span {
+      display: inline-block;
+      opacity: 0;
+      margin-right: 0.25em;
+    }
+
+    .word-span.visible {
+      animation: word-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Word fade-out */
+    @keyframes word-fade-out {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(6px) scale(0.8);
+        filter: blur(3px);
+      }
+    }
+
+    .word-span.hiding {
+      animation: word-fade-out 0.3s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+    }
+
+    /* Card cursor when clickable */
+    #letter-card.clickable {
+      cursor: pointer;
+    }
+
+    /* Spinning record / note for player */
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spin-active {
+      animation: spin 4s linear infinite;
+    }
+
+    /* Pulse Helper for Wax Seal */
+    @keyframes pulse-helper {
+
+      0%,
+      100% {
+        transform: scale(1) translate(-50%, -50%);
+        opacity: 0.75;
+      }
+
+      50% {
+        transform: scale(1.15) translate(-43%, -43%);
+        opacity: 0;
+      }
+    }
+
+    .pulse-ring {
+      animation: pulse-helper 2s infinite ease-out;
+    }
+
+    /* Flap unfold shimmer */
+    @keyframes flap-shimmer {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(1.3); }
+      100% { filter: brightness(1); }
+    }
+
+    /* Transition classes for physics envelope — SLOW & DREAMY */
+    #envelope-container {
+      transition: bottom 2.2s cubic-bezier(0.19, 1, 0.22, 1);
+      overflow: hidden;
+    }
+
+    #letter-card-wrapper.state-opened #envelope-container {
+      overflow: visible;
+    }
+
+    #letter-card {
+      transition: top 2.5s cubic-bezier(0.19, 1, 0.22, 1), opacity 1.8s ease-in-out;
+    }
+
+    #envelope-flap {
+      transition: transform 2s cubic-bezier(0.19, 1, 0.22, 1), opacity 1.5s ease-in-out 0.8s;
+    }
+
+    #wax-seal-btn {
+      transition: opacity 0.6s ease-in-out;
+    }
+
+    #postmark-stamp {
+      transition: opacity 1.2s ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="font-sans text-[#201b13]">
+
+  <!-- WebGL Shader Background -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <canvas id="shader-canvas" class="w-full h-full opacity-65"></canvas>
+  </div>
+
+  <!-- Audio Element -->
+  <audio id="bg-music" loop src="/song.mp3"></audio>
+
+  <!-- Ambient Hearts Container -->
+  <div id="ambient-hearts" class="fixed inset-0 z-10 pointer-events-none"></div>
+
+  <!-- Main scaling container -->
+  <div id="letter-card-wrapper" class="state-closed z-20">
+
+    <!-- Envelope Main Element -->
+    <div id="envelope-container" class="absolute w-[520px] h-[380px] left-[10px]" style="bottom: 160px;">
+
+      <!-- Envelope Back Face -->
+      <svg width="520" height="380" viewBox="0 0 520 380" class="absolute inset-0">
+        <path d="M0,105 L520,105 L520,380 L0,380 Z" fill="#F0EAE1" stroke="#E5E2D9" stroke-width="1.5" />
+        <path d="M0,105 L260,245 L520,105" fill="#FAF5E8" opacity="0.4" />
+      </svg>
+
+      <!-- 1. The Scalloped Stamp Card -->
+      <div id="letter-card" class="absolute left-[35px] w-[450px] h-[620px] select-none z-20"
+        style="top: 130px; opacity: 0; pointer-events: none;" onclick="closeEnvelope()">
+        <!-- SVG Background scalloped mask & border -->
+        <svg id="card-scalloped-bg" width="450" height="620" viewBox="0 0 450 620"
+          class="absolute inset-0 w-full h-full drop-shadow-[0_10px_25px_rgba(0,0,0,0.3)]">
+          <defs>
+            <!-- Real paper texture using fine monochrome fractal noise -->
+            <filter id="paper-noise" x="0%" y="0%" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.3" numOctaves="3" result="noise" />
+              <feColorMatrix type="matrix"
+                values="0.33,0.33,0.33,0,0,0.33,0.33,0.33,0,0,0.33,0.33,0.33,0,0,0,0,0,0.035,0" result="grayNoise" />
+              <feBlend mode="multiply" in="SourceGraphic" in2="grayNoise" />
+            </filter>
+          </defs>
+          <path id="scalloped-path" fill="#FAF5E8" stroke="#DCD6C8" stroke-width="2" filter="url(#paper-noise)" />
+        </svg>
+
+        <!-- 3D paper light highlight overlay -->
+        <div class="absolute inset-0 pointer-events-none"
+          style="background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 60%, rgba(139,14,23,0.02) 100%);">
+        </div>
+
+        <!-- Stamp Card Content Area -->
+        <div class="absolute inset-[10px] pt-[34px] px-6 pb-6 flex flex-col justify-between z-10">
+          <!-- Inset dotted line decoration -->
+          <div
+            class="absolute inset-[6px] border-[1.2px] border-dashed border-[#8B0E17]/30 rounded-sm pointer-events-none">
+          </div>
+
+          <!-- Top Header Section -->
+          <div class="text-center mt-1 content-reveal" style="animation-delay: 0s">
+            <h1 class="font-serif text-[28px] font-bold text-[#8B0E17] tracking-[0.18em] leading-none uppercase">A Love
+              Letter</h1>
+          </div>
+
+          <!-- Middle Section: Fields & Photos -->
+          <div class="grid grid-cols-[190px_1fr] gap-3 items-center my-3 relative content-reveal" style="animation-delay: 0.3s">
+            <!-- Left side: TO and FROM fields -->
+            <div class="flex flex-col gap-4 pl-1">
+              <div class="flex flex-col border-b-[1.2px] border-[#8B0E17] pb-0.5">
+                <span class="font-sans text-[9px] font-bold text-[#8B0E17]/60 tracking-wider">TO:</span>
+                <span id="field-to"
+                  class="font-script text-[28px] text-[#8B0E17] leading-none outline-none mt-0.5 min-w-[120px]">Clara</span>
+              </div>
+              <div class="flex flex-col border-b-[1.2px] border-[#8B0E17] pb-0.5">
+                <span class="font-sans text-[9px] font-bold text-[#8B0E17]/60 tracking-wider">FROM:</span>
+                <span id="field-from"
+                  class="font-script text-[28px] text-[#8B0E17] leading-none outline-none mt-0.5 min-w-[120px]">Allen</span>
+              </div>
+            </div>
+
+            <!-- Right side: Couple Photo Stamps -->
+            <div class="flex justify-end gap-2 pr-1">
+              <!-- Stamp 1 -->
+              <div class="relative w-[76px] h-[108px] shadow-sm">
+                <div id="stamp-container-1" class="w-full h-full">
+                  <!-- SVG Stamp will render here programmatically -->
+                </div>
+              </div>
+
+              <!-- Stamp 2 -->
+              <div class="relative w-[76px] h-[108px] shadow-sm">
+                <div id="stamp-container-2" class="w-full h-full">
+                  <!-- SVG Stamp will render here programmatically -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pill Badge -->
+          <div class="text-center content-reveal" style="animation-delay: 0.6s">
+            <div
+              class="inline-block bg-[#9E5343] text-[#FAF5E8] px-3 py-0.5 rounded-full text-[9px] font-sans font-bold tracking-widest uppercase shadow-sm">
+              <span id="field-badge" class="outline-none">telegram @designtekek</span>
+            </div>
+          </div>
+
+          <!-- Handwritten Title -->
+          <div class="text-center content-reveal" style="animation-delay: 0.9s">
+            <h2 id="field-title" class="font-script text-[28px] text-[#8B0E17] leading-none outline-none">My Love, Clara
+            </h2>
+          </div>
+
+          <!-- Body Text Paragraph (word-by-word reveal) -->
+          <div class="px-2 leading-relaxed text-center content-reveal" style="animation-delay: 1.2s">
+            <p id="field-body"
+              class="font-handwritten text-[18px] font-medium text-[#8B0E17] leading-[1.5] outline-none"></p>
+          </div>
+
+          <!-- Sign-off Line -->
+          <div class="text-center mr-4 flex justify-end content-reveal" style="animation-delay: 1.5s">
+            <span id="field-signoff" class="font-handwritten text-[18px] text-[#8B0E17] outline-none">—your bf/gf,
+              Name</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Envelope Front Pocket -->
+      <svg width="520" height="380" viewBox="0 0 520 380"
+        class="absolute inset-0 z-30 drop-shadow-[0_-5px_15px_rgba(0,0,0,0.18)] pointer-events-none">
+        <!-- Cream textured pocket base -->
+        <path d="M0,105 L260,250 L520,105 L520,380 L0,380 Z" fill="#FAF5E8" stroke="#EBE8DF" stroke-width="1.5" />
+        <!-- Inner shadow shading along folds -->
+        <path d="M0,105 L260,250 L520,105" fill="none" stroke="#E5E2D9" stroke-width="2.5" opacity="0.6" />
+        <path d="M0,380 L260,250 M520,380 L260,250" fill="none" stroke="#E0DBD0" stroke-width="1.5" opacity="0.4" />
+      </svg>
+
+      <!-- Postmark Stamp overlay (tilted, bottom right) -->
+      <div id="postmark-stamp"
+        class="absolute right-[35px] bottom-[30px] pointer-events-none z-30 opacity-0 transition-opacity duration-700">
+        <svg width="100" height="100" viewBox="0 0 100 100" class="rotate-[12deg] opacity-[0.75]">
+          <path id="postmark-text-path" d="M 15 50 a 35 35 0 1 1 70 0 a 35 35 0 1 1 -70 0" fill="none" stroke="none" />
+          <circle cx="50" cy="50" r="35" fill="none" stroke="#A84A42" stroke-width="1.2" stroke-dasharray="2,2" />
+          <circle cx="50" cy="50" r="29" fill="none" stroke="#A84A42" stroke-width="0.8" />
+          <text fill="#A84A42" font-family="'Plus Jakarta Sans', sans-serif" font-size="7" font-weight="bold"
+            letter-spacing="1.5">
+            <textPath href="#postmark-text-path" startOffset="50%" text-anchor="middle">
+              MADE WITH LOVE • EST 2026 •
+            </textPath>
+          </text>
+          <!-- Center heart of stamp -->
+          <path d="M 50 43 C 46 39, 41 43, 41 48 C 41 54, 50 58, 50 61 C 50 58, 59 54, 59 48 C 59 43, 54 39, 50 43 Z"
+            fill="#A84A42" />
+        </svg>
+      </div>
+
+      <!-- Envelope Flap (3D Flip Part) -->
+      <div id="envelope-flap" class="absolute top-[105px] left-0 w-[520px] h-[145px] z-40"
+        style="transform-origin: top; transform-style: preserve-3d;">
+        <!-- Front Flap Face (Closed / Triangle pointing down) -->
+        <div class="flap-front absolute inset-0 backface-hidden z-40">
+          <svg width="520" height="145" viewBox="0 0 520 145"
+            class="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.12)]">
+            <path d="M0,0 L260,135 L520,0 Z" fill="#FAF5E8" stroke="#EBE8DF" stroke-width="1.5" />
+          </svg>
+        </div>
+        <!-- Back Flap Face (Opened / Triangle pointing up) -->
+        <div class="flap-back absolute inset-0 backface-hidden z-30" style="transform: rotateX(180deg);">
+          <svg width="520" height="145" viewBox="0 0 520 145" class="w-full h-full">
+            <path d="M0,0 L260,135 L520,0 Z" fill="#FAF5E8" stroke="#E5E2D9" stroke-width="1.5" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Wax Seal & Click Trigger -->
+      <div id="wax-seal-btn"
+        class="absolute left-[260px] top-[240px] -translate-x-1/2 -translate-y-1/2 z-50 cursor-pointer transition-all duration-500">
+        <!-- Floating Helper Alert -->
+        <div id="open-helper-text"
+          class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-[#FAF5E8] text-[#8B0E17] text-[10px] font-sans font-bold tracking-widest px-3 py-1 rounded-md whitespace-nowrap shadow-md border border-red-100 flex items-center gap-1 transition-all duration-300">
+          <span class="material-symbols-outlined text-xs animate-bounce">favorite</span>
+          TAP SEAL TO OPEN
+        </div>
+
+        <!-- Pulsing Ring -->
+        <div
+          class="pulse-ring absolute w-[90px] h-[90px] rounded-full border-2 border-red-500 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-75 pointer-events-none">
+        </div>
+
+        <!-- Seal Drawing -->
+        <div onclick="openEnvelope()" class="transition-transform duration-300 hover:scale-110 active:scale-95">
+          <svg width="76" height="76" viewBox="0 0 100 100" class="drop-shadow-[0_4px_8px_rgba(139,14,23,0.4)]">
+            <defs>
+              <filter id="wax-depth-3d" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
+                <feOffset in="blur" dx="1.5" dy="3" result="offset" />
+                <feSpecularLighting in="blur" surfaceScale="5" specularConstant="1" specularExponent="22"
+                  lighting-color="#fff" result="specOut">
+                  <feDistantLight azimuth="225" elevation="45" />
+                </feSpecularLighting>
+                <feComposite in="specOut" in2="SourceAlpha" operator="in" result="specOut" />
+                <feComposite in="SourceGraphic" in2="specOut" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"
+                  result="litPaint" />
+                <feMerge>
+                  <feMergeNode in="offset" />
+                  <feMergeNode in="litPaint" />
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- Wax outer border irregular -->
+            <path d="M 50 10 C 26 2, 6 22, 13 50 C 18 78, 50 94, 50 97 C 50 94, 82 78, 87 50 C 94 22, 74 2, 50 10 Z"
+              fill="#8A030C" filter="url(#wax-depth-3d)" />
+            <!-- Inner gloss layer -->
+            <path d="M 50 15 C 31 6, 11 26, 21 50 C 31 74, 50 89, 50 91 C 50 89, 69 74, 79 50 C 89 26, 69 6, 50 15 Z"
+              fill="#9B111E" opacity="0.9" filter="url(#wax-depth-3d)" />
+            <!-- Embossed central heart outline -->
+            <path d="M 50 31 C 41 21, 26 34, 36 49 C 46 64, 50 74, 50 76 C 50 74, 54 64, 64 49 C 74 34, 59 21, 50 31 Z"
+              fill="#6B0005" />
+            <path d="M 50 34 C 42 25, 29 37, 38 50 C 47 63, 50 71, 50 73 C 50 71, 53 63, 62 50 C 71 37, 58 25, 50 34 Z"
+              fill="#8A030C" opacity="0.8" />
+          </svg>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Top Right Music Toggle Button -->
+  <button id="music-toggle-btn" onclick="toggleMusic()"
+    class="fixed top-4 right-4 z-50 flex items-center justify-center w-12 h-12 bg-[#FAF5E8]/85 backdrop-blur rounded-full shadow-lg border border-[#FAF5E8]/40 text-[#8B0E17] hover:scale-105 active:scale-95 transition-all animate-none"
+    title="Toggle Romantic Music">
+    <span id="music-icon" class="material-symbols-outlined fill-0 text-2xl">music_note</span>
+  </button>
+
+
+
+  <script>
+    // 1. Programmatic Layout Scaling
+    function scaleApp() {
+      const wrapper = document.getElementById('letter-card-wrapper');
+      const isOpened = !wrapper.classList.contains('state-closed');
+
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // Bounding box size varies based on whether it is open or closed
+      const targetW = 540;
+      const targetH = isOpened ? 740 : 420;
+
+      // Calculate best scaling factor
+      const scale = Math.min(1.2, Math.min((w - 24) / targetW, (h - 24) / targetH));
+      wrapper.style.setProperty('--scale', scale);
+    }
+    window.addEventListener('resize', scaleApp);
+    window.addEventListener('DOMContentLoaded', scaleApp);
+    scaleApp();
+
+    // 2. Programmatic Scalloped Card Path Generator (450x620 dimensions)
+    function updateCardScallops() {
+      const pathEl = document.getElementById('scalloped-path');
+      const w = 450;
+      const h = 620;
+      const r = 8; // notch radius
+      const spacing = 22; // target spacing
+
+      let path = `M ${r} ${r} `;
+
+      // Top edge (left to right)
+      let nX = Math.round((w - 2 * r) / spacing);
+      let gX = (w - 2 * r) / nX;
+      for (let i = 0; i < nX; i++) {
+        let x1 = r + i * gX;
+        let cx = x1 + gX / 2;
+        path += `L ${cx - r} ${r} A ${r} ${r} 0 0 0 ${cx + r} ${r} `;
+      }
+      path += `L ${w - r} ${r} `;
+
+      // Right edge (top to bottom)
+      let nY = Math.round((h - 2 * r) / spacing);
+      let gY = (h - 2 * r) / nY;
+      for (let i = 0; i < nY; i++) {
+        let y1 = r + i * gY;
+        let cy = y1 + gY / 2;
+        path += `L ${w - r} ${cy - r} A ${r} ${r} 0 0 0 ${w - r} ${cy + r} `;
+      }
+      path += `L ${w - r} ${h - r} `;
+
+      // Bottom edge (right to left)
+      for (let i = nX - 1; i >= 0; i--) {
+        let x1 = r + i * gX;
+        let cx = x1 + gX / 2;
+        path += `L ${cx + r} ${h - r} A ${r} ${r} 0 0 0 ${cx - r} ${h - r} `;
+      }
+      path += `L ${r} ${h - r} `;
+
+      // Left edge (bottom to top)
+      for (let i = nY - 1; i >= 0; i--) {
+        let y1 = r + i * gY;
+        let cy = y1 + gY / 2;
+        path += `L ${r} ${cy + r} A ${r} ${r} 0 0 0 ${r} ${cy - r} `;
+      }
+      path += 'Z';
+
+      pathEl.setAttribute('d', path);
+    }
+    updateCardScallops();
+
+    // Helper for stamp scallops inside SVG
+    function getScallopedStampSvg(w, h, r, spacing, imageUrl, id) {
+      let path = `M ${r} ${r} `;
+      let nX = Math.round((w - 2 * r) / spacing);
+      let gX = (w - 2 * r) / nX;
+      for (let i = 0; i < nX; i++) {
+        let x1 = r + i * gX;
+        let cx = x1 + gX / 2;
+        path += `L ${cx - r} ${r} A ${r} ${r} 0 0 0 ${cx + r} ${r} `;
+      }
+      path += `L ${w - r} ${r} `;
+
+      let nY = Math.round((h - 2 * r) / spacing);
+      let gY = (h - 2 * r) / nY;
+      for (let i = 0; i < nY; i++) {
+        let y1 = r + i * gY;
+        let cy = y1 + gY / 2;
+        path += `L ${w - r} ${cy - r} A ${r} ${r} 0 0 0 ${w - r} ${cy + r} `;
+      }
+      path += `L ${w - r} ${h - r} `;
+
+      for (let i = nX - 1; i >= 0; i--) {
+        let x1 = r + i * gX;
+        let cx = x1 + gX / 2;
+        path += `L ${cx + r} ${h - r} A ${r} ${r} 0 0 0 ${cx - r} ${h - r} `;
+      }
+      path += `L ${r} ${h - r} `;
+
+      for (let i = nY - 1; i >= 0; i--) {
+        let y1 = r + i * gY;
+        let cy = y1 + gY / 2;
+        path += `L ${r} ${cy + r} A ${r} ${r} 0 0 0 ${r} ${cy - r} `;
+      }
+      path += 'Z';
+
+      const innerDashedInset = 5;
+      const innerW = w - 2 * innerDashedInset;
+      const innerH = h - 2 * innerDashedInset;
+
+      return `
+        <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="w-full h-full">
+          <defs>
+            <clipPath id="stamp-clip-${id}">
+              <path d="${path}" />
+            </clipPath>
+          </defs>
+          <!-- Base Stamp Paper and shadows -->
+          <path d="${path}" fill="#FAF5E8" stroke="#8B0E17" stroke-width="1.2" />
+          <!-- Image fill -->
+          <image href="${imageUrl}" width="${w}" height="${h}" clip-path="url(#stamp-clip-${id})" preserveAspectRatio="xMidYMid slice" />
+          <!-- Stamp border dotted inset -->
+          <rect x="${innerDashedInset}" y="${innerDashedInset}" width="${innerW}" height="${innerH}" fill="none" stroke="#FAF5E8" stroke-width="1.2" stroke-dasharray="2,2" clip-path="url(#stamp-clip-${id})" />
+        </svg>
+      `;
+    }
+
+    // Default stamp image assets
+    let photo1 = 'couple_photo_1.png';
+    let photo2 = 'couple_photo_2.png';
+
+    function renderStamps() {
+      document.getElementById('stamp-container-1').innerHTML = getScallopedStampSvg(76, 108, 3, 11, photo1, 1);
+      document.getElementById('stamp-container-2').innerHTML = getScallopedStampSvg(76, 108, 3, 11, photo2, 2);
+    }
+    renderStamps();
+
+
+
+    // Message text stored for word-by-word reveal
+    const bodyMessageText = "My love Arpan, ever since you came into my life, everything feels brighter and more meaningful—your smile gives me peace, your voice brings me joy, and your presence makes every moment feel complete; I carry you in my heart always, and no matter where life takes us, my love for you will only grow stronger.";
+
+    // Word-by-word typewriter function
+    function typewriteWords(elementId, text, delayPerWord) {
+      const el = document.getElementById(elementId);
+      el.innerHTML = '';
+      const words = text.split(/\s+/);
+      words.forEach((word, i) => {
+        const span = document.createElement('span');
+        span.className = 'word-span';
+        span.textContent = word;
+        el.appendChild(span);
+
+        setTimeout(() => {
+          span.classList.add('visible');
+        }, i * delayPerWord);
+      });
+    }
+
+    // 5. Envelope Opening / Closing Transition Sequences — SLOW & CINEMATIC
+    let isOpening = false;
+    let isOpened = false;
+    let isClosing = false;
+    let openTimeouts = []; // track timeouts so we can manage state
+
+    function openEnvelope() {
+      if (isOpening || isOpened || isClosing) return;
+      isOpening = true;
+
+      const wrapper = document.getElementById('letter-card-wrapper');
+      const container = document.getElementById('envelope-container');
+      const flap = document.getElementById('envelope-flap');
+      const card = document.getElementById('letter-card');
+      const seal = document.getElementById('wax-seal-btn');
+      const helper = document.getElementById('open-helper-text');
+      const postmark = document.getElementById('postmark-stamp');
+
+      // Autoplay background music immediately on tap
+      const music = document.getElementById('bg-music');
+      if (music.paused) {
+        music.play().then(() => {
+          document.getElementById('music-icon').innerText = 'music_note';
+          document.getElementById('music-icon').classList.add('spin-active');
+        }).catch(err => console.log("Audio play blocked: " + err));
+      }
+
+      // ═══════════════════════════════════════════
+      // STAGE 0: Seal crack animation (0 – 1200ms)
+      // ═══════════════════════════════════════════
+      helper.style.opacity = '0';
+      const sealInner = seal.querySelector('.transition-transform');
+      if (sealInner) sealInner.classList.add('seal-cracking');
+
+      // Initial small sparkle burst from the seal
+      const originX = window.innerWidth / 2;
+      const originY = window.innerHeight / 2 + 100;
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => createSparkleParticle(originX, originY), i * 40);
+      }
+
+      // ═══════════════════════════════════════════
+      // STAGE 1: Flap slowly unfolds (1200 – 3200ms)
+      // ═══════════════════════════════════════════
+      setTimeout(() => {
+        wrapper.classList.remove('state-closed');
+        wrapper.classList.add('state-opened');
+
+        seal.style.opacity = '0';
+        seal.style.pointerEvents = 'none';
+
+        // Slow flap flip
+        flap.style.transform = 'rotateX(180deg)';
+        flap.style.opacity = '0';
+        flap.style.pointerEvents = 'none';
+
+        // Staggered heart burst as flap opens
+        for (let i = 0; i < 25; i++) {
+          setTimeout(() => createHeartParticle(originX, originY - 40), i * 60);
+        }
+      }, 1200);
+
+      // ═══════════════════════════════════════════
+      // STAGE 2: Letter slowly rises out (3200ms+)
+      // ═══════════════════════════════════════════
+      setTimeout(() => {
+        container.style.bottom = '20px';
+        card.style.top = '-350px';
+        card.style.opacity = '1';
+        card.style.pointerEvents = 'auto';
+        postmark.style.opacity = '1';
+
+        // Recalculate scaling
+        scaleApp();
+
+        // Second wave of hearts + cute emojis
+        for (let i = 0; i < 30; i++) {
+          setTimeout(() => createHeartParticle(originX, originY - 80), i * 50);
+        }
+        // Cute floating emoji burst
+        const emojis = ['💕', '✨', '💗', '🌸', '💖', '💘', '🦋', '🌹', '💝', '💐'];
+        for (let i = 0; i < 15; i++) {
+          setTimeout(() => createEmojiParticle(originX, originY - 60, emojis[i % emojis.length]), i * 120);
+        }
+
+        // Sparkle trail as card rises
+        for (let i = 0; i < 20; i++) {
+          setTimeout(() => {
+            createSparkleParticle(
+              originX + (Math.random() * 200 - 100),
+              originY - 100 - (i * 10)
+            );
+          }, i * 100);
+        }
+      }, 3200);
+
+      // ═══════════════════════════════════════════
+      // STAGE 3: Card arrives — wobble + glow + staggered content (5500ms+)
+      // ═══════════════════════════════════════════
+      setTimeout(() => {
+        // Add wobble effect to the card
+        card.classList.add('card-wobble');
+
+        // Add glowing aura behind card
+        const glow = document.createElement('div');
+        glow.className = 'card-glow';
+        card.appendChild(glow);
+
+        // Staggered content reveal
+        const contentSections = card.querySelectorAll('.content-reveal');
+        contentSections.forEach((el, i) => {
+          setTimeout(() => {
+            el.classList.add('animate');
+          }, i * 300);
+        });
+
+        // Word-by-word message reveal (starts after other content sections finish)
+        const wordRevealDelay = contentSections.length * 300 + 600;
+        setTimeout(() => {
+          typewriteWords('field-body', bodyMessageText, 120);
+        }, wordRevealDelay);
+
+        // Final celebratory burst of sparkles + emojis
+        const celebEmojis = ['💕', '✨', '🥰', '💗', '🎀', '💫'];
+        for (let i = 0; i < 10; i++) {
+          setTimeout(() => {
+            createSparkleParticle(
+              originX + (Math.random() * 300 - 150),
+              originY - 200 + (Math.random() * 100 - 50)
+            );
+            if (i % 2 === 0) {
+              createEmojiParticle(
+                originX + (Math.random() * 250 - 125),
+                originY - 150,
+                celebEmojis[i % celebEmojis.length]
+              );
+            }
+          }, i * 200);
+        }
+        // Mark card as clickable after content is fully revealed
+        const totalContentTime = contentSections.length * 300 + 600 + (bodyMessageText.split(/\s+/).length * 120) + 500;
+        setTimeout(() => {
+          card.classList.add('clickable');
+          isOpened = true;
+          isOpening = false;
+        }, totalContentTime);
+      }, 5500);
+    }
+
+    // ═══════════════════════════════════════════════
+    // CLOSE ENVELOPE — reverse everything slowly
+    // ═══════════════════════════════════════════════
+    function closeEnvelope() {
+      if (!isOpened || isClosing || isOpening) return;
+      isClosing = true;
+      isOpened = false;
+
+      const wrapper = document.getElementById('letter-card-wrapper');
+      const container = document.getElementById('envelope-container');
+      const flap = document.getElementById('envelope-flap');
+      const card = document.getElementById('letter-card');
+      const seal = document.getElementById('wax-seal-btn');
+      const helper = document.getElementById('open-helper-text');
+      const postmark = document.getElementById('postmark-stamp');
+
+      card.classList.remove('clickable');
+
+      // ═══════════════════════════════════════════
+      // CLOSE STAGE 0: Fade out words in reverse (0ms)
+      // ═══════════════════════════════════════════
+      const wordSpans = card.querySelectorAll('.word-span.visible');
+      const totalWords = wordSpans.length;
+      wordSpans.forEach((span, i) => {
+        setTimeout(() => {
+          span.classList.remove('visible');
+          span.classList.add('hiding');
+        }, (totalWords - 1 - i) * 40); // reverse order, fast
+      });
+
+      // ═══════════════════════════════════════════
+      // CLOSE STAGE 1: Fade out content sections in reverse (800ms)
+      // ═══════════════════════════════════════════
+      setTimeout(() => {
+        const contentSections = Array.from(card.querySelectorAll('.content-reveal.animate'));
+        contentSections.reverse().forEach((el, i) => {
+          setTimeout(() => {
+            el.classList.remove('animate');
+            el.classList.add('hide');
+          }, i * 200);
+        });
+
+        // Remove glow aura
+        const glow = card.querySelector('.card-glow');
+        if (glow) {
+          glow.style.opacity = '0';
+          glow.style.transition = 'opacity 1s ease-out';
+          setTimeout(() => glow.remove(), 1000);
+        }
+
+        // Remove wobble class
+        card.classList.remove('card-wobble');
+      }, 800);
+
+      // ═══════════════════════════════════════════
+      // CLOSE STAGE 2: Slide card back down into envelope (2500ms)
+      // ═══════════════════════════════════════════
+      setTimeout(() => {
+        card.style.top = '130px';
+        card.style.opacity = '0';
+        card.style.pointerEvents = 'none';
+        postmark.style.opacity = '0';
+
+        // Push envelope back up
+        container.style.bottom = '160px';
+
+        // Recalculate scaling for closed state
+        wrapper.classList.remove('state-opened');
+        wrapper.classList.add('state-closed');
+        scaleApp();
+      }, 2500);
+
+      // ═══════════════════════════════════════════
+      // CLOSE STAGE 3: Fold flap closed & restore seal (4500ms)
+      // ═══════════════════════════════════════════
+      setTimeout(() => {
+        // Fold flap back
+        flap.style.transform = 'rotateX(0deg)';
+        flap.style.opacity = '1';
+        flap.style.pointerEvents = 'auto';
+      }, 4500);
+
+      // ═══════════════════════════════════════════
+      // CLOSE STAGE 4: Restore wax seal & helper (6500ms)
+      // ═══════════════════════════════════════════
+      setTimeout(() => {
+        // Restore seal
+        seal.style.opacity = '1';
+        seal.style.pointerEvents = 'auto';
+        const sealInner = seal.querySelector('.transition-transform');
+        if (sealInner) sealInner.classList.remove('seal-cracking');
+
+        // Show helper text again
+        helper.style.opacity = '1';
+
+        // Reset content-reveal classes for next open
+        card.querySelectorAll('.content-reveal').forEach(el => {
+          el.classList.remove('animate', 'hide');
+        });
+
+        // Clear word spans
+        const bodyEl = document.getElementById('field-body');
+        bodyEl.innerHTML = '';
+
+        isClosing = false;
+      }, 6500);
+    }
+
+    // Create sparkle / star particle
+    function createSparkleParticle(x, y) {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle-particle';
+      sparkle.innerHTML = '✦';
+      sparkle.style.left = `${x}px`;
+      sparkle.style.top = `${y}px`;
+      sparkle.style.color = ['#FFD700', '#FFF0C0', '#FF69B4', '#FFB6C1', '#FFFFFF'][Math.floor(Math.random() * 5)];
+      sparkle.style.fontSize = `${Math.floor(Math.random() * 16 + 10)}px`;
+      sparkle.style.textShadow = '0 0 6px currentColor';
+
+      const duration = (Math.random() * 2 + 1.5).toFixed(2);
+      const angle = (Math.random() * 360) * Math.PI / 180;
+      const distance = Math.random() * 180 + 60;
+      const tx = (Math.cos(angle) * distance).toFixed(2);
+      const ty = (Math.sin(angle) * distance - 100).toFixed(2);
+      const rot = Math.floor(Math.random() * 720 - 360);
+      const scale = (Math.random() * 1.0 + 0.5).toFixed(2);
+
+      sparkle.style.setProperty('--tx', `${tx}px`);
+      sparkle.style.setProperty('--ty', `${ty}px`);
+      sparkle.style.setProperty('--rot', `${rot}deg`);
+      sparkle.style.setProperty('--scale', scale);
+      sparkle.style.setProperty('--duration', `${duration}s`);
+
+      document.getElementById('ambient-hearts').appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), parseFloat(duration) * 1000);
+    }
+
+    // Create cute emoji particle
+    function createEmojiParticle(x, y, emoji) {
+      const el = document.createElement('div');
+      el.className = 'emoji-particle';
+      el.innerText = emoji;
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+
+      const duration = (Math.random() * 2.5 + 2).toFixed(2);
+      const angle = (Math.random() * 360) * Math.PI / 180;
+      const distance = Math.random() * 200 + 80;
+      const tx = (Math.cos(angle) * distance).toFixed(2);
+      const ty = (Math.sin(angle) * distance - 200).toFixed(2);
+      const rot = Math.floor(Math.random() * 60 - 30);
+      const scale = (Math.random() * 0.8 + 0.6).toFixed(2);
+      const size = Math.floor(Math.random() * 14 + 18);
+
+      el.style.setProperty('--tx', `${tx}px`);
+      el.style.setProperty('--ty', `${ty}px`);
+      el.style.setProperty('--rot', `${rot}deg`);
+      el.style.setProperty('--scale', scale);
+      el.style.setProperty('--duration', `${duration}s`);
+      el.style.setProperty('--size', `${size}px`);
+
+      document.getElementById('ambient-hearts').appendChild(el);
+      setTimeout(() => el.remove(), parseFloat(duration) * 1000);
+    }
+
+    function createHeartParticle(x, y) {
+      const heart = document.createElement('span');
+      heart.className = 'material-symbols-outlined heart-particle';
+      heart.style.left = `${x}px`;
+      heart.style.top = `${y}px`;
+      heart.style.fontVariationSettings = "'FILL' 1, 'wght' 400";
+      heart.innerText = 'favorite';
+
+      const duration = (Math.random() * 1.5 + 1.2).toFixed(2);
+      const angle = (Math.random() * 360) * Math.PI / 180;
+      const distance = Math.random() * 220 + 80;
+
+      const tx = (Math.cos(angle) * distance).toFixed(2);
+      const ty = (Math.sin(angle) * distance - 250).toFixed(2); // Fly upwards
+      const rot = Math.floor(Math.random() * 360 - 180);
+      const scale = (Math.random() * 1.2 + 0.6).toFixed(2);
+
+      heart.style.setProperty('--tx', `${tx}px`);
+      heart.style.setProperty('--ty', `${ty}px`);
+      heart.style.setProperty('--rot', `${rot}deg`);
+      heart.style.setProperty('--scale', scale);
+      heart.style.setProperty('--duration', `${duration}s`);
+      heart.style.fontSize = `${Math.floor(Math.random() * 15 + 10)}px`;
+
+      document.getElementById('ambient-hearts').appendChild(heart);
+
+      setTimeout(() => {
+        heart.remove();
+      }, parseFloat(duration) * 1000);
+    }
+
+    // Spawns slow ambient floating hearts in the background occasionally
+    setInterval(() => {
+      const burstContainer = document.getElementById('ambient-hearts');
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      const heart = document.createElement('span');
+      heart.className = 'material-symbols-outlined heart-particle';
+      heart.style.left = `${Math.random() * w}px`;
+      heart.style.top = `${h + 20}px`;
+      heart.style.fontVariationSettings = "'FILL' 1, 'wght' 200";
+      heart.innerText = 'favorite';
+
+      const duration = (Math.random() * 4 + 4).toFixed(2);
+      const tx = (Math.random() * 100 - 50).toFixed(2);
+      const ty = `-${h + 100}px`;
+      const rot = Math.floor(Math.random() * 180 - 90);
+      const scale = (Math.random() * 0.8 + 0.3).toFixed(2);
+
+      heart.style.setProperty('--tx', `${tx}px`);
+      heart.style.setProperty('--ty', ty);
+      heart.style.setProperty('--rot', `${rot}deg`);
+      heart.style.setProperty('--scale', scale);
+      heart.style.setProperty('--duration', `${duration}s`);
+      heart.style.fontSize = `${Math.floor(Math.random() * 18 + 12)}px`;
+      heart.style.opacity = 0.25;
+
+      burstContainer.appendChild(heart);
+
+      setTimeout(() => {
+        heart.remove();
+      }, parseFloat(duration) * 1000);
+    }, 2000);
+
+    // 6. Music Toggle Controls
+    function toggleMusic() {
+      const music = document.getElementById('bg-music');
+      const icon = document.getElementById('music-icon');
+      if (music.paused) {
+        music.play();
+        icon.innerText = 'music_note';
+        icon.classList.add('spin-active');
+      } else {
+        music.pause();
+        icon.innerText = 'music_off';
+        icon.classList.remove('spin-active');
+      }
+    }
+
+
+
+    // 8. WebGL Bokeh Shader Background logic
+    (ariaShader = function () {
+      const canvas = document.getElementById('shader-canvas');
+
+      function resizeCanvas() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+        }
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return;
+
+      const vs = `
+        attribute vec2 position;
+        varying vec2 uv;
+        void main() {
+          uv = position * 0.5 + 0.5;
+          gl_Position = vec4(position, 0.0, 1.0);
+        }
+      `;
+
+      const fs = `
+        precision highp float;
+        varying vec2 uv;
+        uniform float time;
+        uniform vec2 resolution;
+
+        float drawHeart(vec2 pos, float scale) {
+          pos *= 2.0;
+          float a = atan(pos.x, pos.y) / 3.14159265;
+          float r = length(pos);
+          float h = abs(a);
+          float d = (13.0 * h - 22.0 * h * h + 10.0 * h * h * h) / (6.0 - 5.0 * h);
+          return smoothstep(d, d - 0.08, r / scale);
+        }
+
+        void main() {
+          vec2 p = uv;
+          vec3 color1 = vec3(0.38, 0.02, 0.06); // Deepest red
+          vec3 color2 = vec3(0.55, 0.05, 0.1);  // Slightly brighter red
+          
+          vec3 finalColor = mix(color1, color2, p.y + sin(time * 0.15) * 0.15);
+          
+          float hearts = 0.0;
+          for (float i = 0.0; i < 9.0; i++) {
+            float seed = i * 238.45;
+            vec2 offset = vec2(
+              fract(sin(seed) * 1000.0 + time * (0.02 + 0.01 * sin(i))),
+              fract(cos(seed) * 1000.0 + time * (0.04 + 0.025 * cos(i)))
+            );
+            vec2 heartCoord = uv - offset;
+            if (heartCoord.x < -0.5) heartCoord.x += 1.0;
+            if (heartCoord.x > 0.5) heartCoord.x -= 1.0;
+            if (heartCoord.y < -0.5) heartCoord.y += 1.0;
+            if (heartCoord.y > 0.5) heartCoord.y -= 1.0;
+
+            float pulse = 0.04 + 0.025 * sin(time * 0.8 + i);
+            hearts += drawHeart(heartCoord, pulse) * (0.16 + 0.08 * sin(time * 0.4 + i));
+          }
+
+          finalColor += vec3(0.95, 0.1, 0.2) * hearts;
+          gl_FragColor = vec4(finalColor, 1.0);
+        }
+      `;
+
+      function compileShader(src, type) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return s;
+      }
+
+      const program = gl.createProgram();
+      gl.attachShader(program, compileShader(vs, gl.VERTEX_SHADER));
+      gl.attachShader(program, compileShader(fs, gl.FRAGMENT_SHADER));
+      gl.linkProgram(program);
+      gl.useProgram(program);
+
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, -1, 1, -1, -1, 1,
+        -1, 1, 1, -1, 1, 1
+      ]), gl.STATIC_DRAW);
+
+      const positionLocation = gl.getAttribLocation(program, 'position');
+      gl.enableVertexAttribArray(positionLocation);
+      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+      const timeUniform = gl.getUniformLocation(program, 'time');
+      const resUniform = gl.getUniformLocation(program, 'resolution');
+
+      function draw(t) {
+        resizeCanvas();
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform1f(timeUniform, t * 0.001);
+        gl.uniform2f(resUniform, canvas.width, canvas.height);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+    })();
+  </script>
+
+</body>
+
+</html>
